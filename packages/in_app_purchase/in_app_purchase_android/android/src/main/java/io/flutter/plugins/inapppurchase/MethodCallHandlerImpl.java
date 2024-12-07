@@ -50,6 +50,7 @@ import io.flutter.plugins.inapppurchase.Messages.PlatformQueryProduct;
 import io.flutter.plugins.inapppurchase.Messages.PlatformReplacementMode;
 import io.flutter.plugins.inapppurchase.Messages.Result;
 import java.util.ArrayList;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.HashMap;
 import java.util.List;
 
@@ -224,11 +225,13 @@ class MethodCallHandlerImpl implements Application.ActivityLifecycleCallbacks, I
     }
 
     try {
+      final AtomicBoolean callbackInvoked = new AtomicBoolean(false);
       QueryProductDetailsParams params =
           QueryProductDetailsParams.newBuilder().setProductList(toProductList(products)).build();
       billingClient.queryProductDetailsAsync(
           params,
           (billingResult, productDetailsList) -> {
+            if (!callbackInvoked.compareAndSet(false, true)) return;
             updateCachedProducts(productDetailsList);
             final PlatformProductDetailsResponse.Builder responseBuilder =
                 new PlatformProductDetailsResponse.Builder()
@@ -380,11 +383,13 @@ class MethodCallHandlerImpl implements Application.ActivityLifecycleCallbacks, I
       // Like in our connect call, consider the billing client responding a "success" here
       // regardless
       // of status code.
+      final AtomicBoolean callbackInvoked = new AtomicBoolean(false);
       QueryPurchasesParams.Builder paramsBuilder = QueryPurchasesParams.newBuilder();
       paramsBuilder.setProductType(toProductTypeString(productType));
       billingClient.queryPurchasesAsync(
           paramsBuilder.build(),
           (billingResult, purchasesList) -> {
+            if (!callbackInvoked.compareAndSet(false, true)) return;
             PlatformPurchasesResponse.Builder builder =
                 new PlatformPurchasesResponse.Builder()
                     .setBillingResult(fromBillingResult(billingResult))
@@ -407,11 +412,13 @@ class MethodCallHandlerImpl implements Application.ActivityLifecycleCallbacks, I
     }
 
     try {
+      final AtomicBoolean callbackInvoked = new AtomicBoolean(false);
       billingClient.queryPurchaseHistoryAsync(
           QueryPurchaseHistoryParams.newBuilder()
               .setProductType(toProductTypeString(productType))
               .build(),
           (billingResult, purchasesList) -> {
+            if (!callbackInvoked.compareAndSet(false, true)) return;
             PlatformPurchaseHistoryResponse.Builder builder =
                 new PlatformPurchaseHistoryResponse.Builder()
                     .setBillingResult(fromBillingResult(billingResult))
