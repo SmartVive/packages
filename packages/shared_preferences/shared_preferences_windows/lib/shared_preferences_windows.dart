@@ -22,14 +22,21 @@ const String _defaultPrefix = 'flutter.';
 ///
 /// This class implements the `package:shared_preferences` functionality for Windows.
 class SharedPreferencesWindows extends SharedPreferencesStorePlatform {
+  /// Creates a Windows shared preferences store.
+  SharedPreferencesWindows({PathProviderWindows? pathProvider}) {
+    if (pathProvider != null) {
+      this.pathProvider = pathProvider;
+    }
+  }
+
   /// Deprecated instance of [SharedPreferencesWindows].
   /// Use [SharedPreferencesStorePlatform.instance] instead.
   @Deprecated('Use `SharedPreferencesStorePlatform.instance` instead.')
   static SharedPreferencesWindows instance = SharedPreferencesWindows();
 
   /// Registers the Windows implementation.
-  static void registerWith() {
-    SharedPreferencesStorePlatform.instance = SharedPreferencesWindows();
+  static void registerWith({PathProviderWindows? pathProvider}) {
+    SharedPreferencesStorePlatform.instance = SharedPreferencesWindows(pathProvider: pathProvider);
     // A temporary work-around for having two plugins contained in a single package.
     SharedPreferencesAsyncWindows.registerWith();
   }
